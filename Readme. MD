@@ -1,0 +1,130 @@
+# ⚡ CodeBridge from Bunchhh
+
+> Connect your project to any AI. No API key. No copy-paste. Build anything.
+
+**pip install codebridge-mcp**
+
+---
+
+## What is CodeBridge?
+
+CodeBridge is a free tool that connects your local project folder directly to Claude, ChatGPT, or Gemini.
+
+Once connected — the AI reads your files, writes fixes, and runs commands directly in your project. You just talk to it like normal.
+
+No API key. No subscription. No copy-paste. Just your free AI account and your project.
+
+---
+
+## Who is it for?
+
+Developers who cannot afford Claude Code or Codex but still want AI to read and fix their actual project files — not just answer questions in a chat box.
+
+---
+
+## Install
+
+```bash
+pip install codebridge-mcp
+```
+
+Requires Python 3.8+. No other dependencies.
+
+---
+
+## Run
+
+```bash
+# In your project folder
+python -m codebridge start
+```
+
+Terminal shows:
+
+```
+╔══════════════════════════════════════════════╗
+║        ⚡  CodeBridge from Bunchhh  ⚡        ║
+╠══════════════════════════════════════════════╣
+║  Project  : my-project                       ║
+║  Code     : CB-6PYQ-E9OI                     ║
+╠══════════════════════════════════════════════╣
+║  Dashboard : http://localhost:7777            ║
+║  MCP URL   : http://localhost:7777/mcp        ║
+╠══════════════════════════════════════════════╣
+║  1. Copy the MCP URL                         ║
+║  2. Paste into Claude / ChatGPT / Gemini     ║
+║  3. See ⚡ logo → start talking              ║
+╚══════════════════════════════════════════════╝
+```
+
+---
+
+## Connect to your AI
+
+See [CONNECT.md](CONNECT.md) for step-by-step instructions for Claude, ChatGPT, and Gemini.
+
+---
+
+## What the AI can do after connecting
+
+| Tool | What it does |
+|---|---|
+| `list_files` | See all files in your project |
+| `read_file` | Read any file directly |
+| `write_file` | Write a fix directly to disk |
+| `run_command` | Run python, pytest, npm, git |
+| `undo` | Restore any file before AI touched it |
+
+---
+
+## How it works
+
+```
+Your laptop                   Claude / ChatGPT / Gemini
+─────────────                 ─────────────────────────
+Your project files  ←──⚡──→  AI reads your code
+CodeBridge running            AI writes fixes back
+port 7777                     Changes appear in your IDE
+```
+
+---
+
+## Switch models anytime
+
+Claude free limit finished? Same project. Go to ChatGPT or Gemini. Paste the same MCP URL. Continue from where you stopped.
+
+---
+
+## Dashboard
+
+Open `http://localhost:7777` in your browser to see:
+- All connected project files
+- Live change log
+- Connection status
+- Apply or undo AI fixes
+
+Works on mobile too — open on your phone while on the same WiFi.
+
+---
+
+## Chrome Extension (alternative)
+
+No terminal needed. Install the extension, select your project folder, and the ⚡ badge appears on Claude.ai / ChatGPT / Gemini automatically.
+
+See the `codebridge/` extension folder for setup.
+
+---
+
+## Built by Bunchhh
+
+CodeBridge is a free side product by [Bunchhh](https://bunchhh.com) — an AI-powered video repurposing platform for content creators.
+
+We built CodeBridge because we faced the same problem: spending daily AI credits on copy-pasting instead of building.
+
+**bunchhh.com**
+
+---
+
+## License
+
+MIT — free forever.

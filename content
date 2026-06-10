@@ -1,0 +1,299 @@
+// CodeBridge from Bunchhh — content.js
+// Injected into Claude.ai, ChatGPT, Gemini
+
+(function() {
+  'use strict';
+
+  let PROJECT = null;
+  let FILES   = {};
+  let BADGE   = null;
+  let TOOLBAR = null;
+
+  // ── Platform detection ───────────────────────────────────────
+  const HOST = location.hostname;
+  const PLATFORM =
+    HOST.includes('claude.ai')  ? 'claude'  :
+    HOST.includes('chatgpt.com')? 'chatgpt' : 'gemini';
+
+  // ── Input selectors per platform ─────────────────────────────
+  const INPUT_SEL = {
+    claude:  'div[contenteditable="true"], [data-testid="composer-input"]',
+    chatgpt: 'div[contenteditable="true"], #prompt-textarea',
+    gemini:  'div[contenteditable="true"], rich-textarea',
+  }[PLATFORM];
+
+  function getInput() {
+    return document.querySelector(INPUT_SEL);
+  }
+
+  // ── Inject text into AI input ─────────────────────────────────
+  function injectText(text) {
+    const el = getInput();
+    if (!el) { alert('Could not find the AI input box. Please click into it first.'); return; }
+    el.focus();
+    const sel = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    document.execCommand('insertText', false, text);
+    el.dispatchEvent(new InputEvent('input', {bubbles: true, cancelable: true}));
+  }
+
+  // ── Build codebase context string ────────────────────────────
+  function buildContext(selectedPaths) {
+    const paths = selectedPaths || Object.keys(FILES).slice(0, 30);
+    let ctx = `\n\n---\n⚡ CodeBridge from Bunchhh — Project: ${PROJECT}\n`;
+    ctx += `Files attached: ${paths.length}\n\n`;
+    for (const p of paths) {
+      if (FILES[p]) {
+        ctx += `### ${p}\n\`\`\`\n${FILES[p].slice(0, 3000)}\n\`\`\`\n\n`;
+      }
+    }
+    ctx += `---\nNow read the above code and help me: `;
+    return ctx;
+  }
+
+  // ── Create floating badge ─────────────────────────────────────
+  function createBadge() {
+    if (BADGE) return;
+
+    BADGE = document.createElement('div');
+    BADGE.id = 'cb-badge';
+    BADGE.innerHTML = `
+      <div style="
+        position:fixed; bottom:80px; right:16px; z-index:999999;
+        background:#0D0B08; border:1px solid rgba(212,165,116,0.3);
+        border-radius:12px; padding:10px 14px;
+        font-family:'Segoe UI',sans-serif; font-size:12px;
+        box-shadow:0 4px 20px rgba(0,0,0,0.4);
+        display:flex; flex-direction:column; gap:6px;
+        min-width:200px;
+      ">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:14px">⚡</span>
+          <span style="color:#E8D5B7;font-weight:600">CodeBridge</span>
+          <span style="font-size:10px;color:#6B5D4F">by Bunchhh</span>
+          <div style="margin-left:auto;width:6px;height:6px;border-radius:50%;background:#74C0A5"></div>
+        </div>
+        <div style="color:#6B5D4F;font-size:11px" id="cb-proj-label">—</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button id="cb-attach-all" style="
+            flex:1; padding:6px 10px; border-radius:6px; border:none; cursor:pointer;
+            background:linear-gradient(135deg,#D4A574,#8B6340);
+            color:#0D0B08; font-size:11px; font-weight:700;
+          ">📎 Attach full codebase</button>
+          <button id="cb-pick" style="
+            padding:6px 10px; border-radius:6px; cursor:pointer;
+            background:rgba(255,255,255,0.04);
+            border:1px solid rgba(255,255,255,0.08);
+            color:#6B5D4F; font-size:11px;
+          ">Pick files</button>
+        </div>
+        <button id="cb-close-badge" style="
+          background:none;border:none;color:#3D3028;
+          font-size:10px;cursor:pointer;text-align:right;padding:0
+        ">hide</button>
+      </div>
+    `;
+
+    document.body.appendChild(BADGE);
+
+    // Attach full codebase
+    document.getElementById('cb-attach-all').addEventListener('click', () => {
+      const ctx = buildContext();
+      injectText(ctx);
+    });
+
+    // Pick specific files
+    document.getElementById('cb-pick').addEventListener('click', () => {
+      showFilePicker();
+    });
+
+    // Hide badge
+    document.getElementById('cb-close-badge').addEventListener('click', () => {
+      BADGE.style.display = 'none';
+      createMiniButton();
+    });
+  }
+
+  // ── Mini button (when badge hidden) ──────────────────────────
+  function createMiniButton() {
+    if (document.getElementById('cb-mini')) return;
+    const mini = document.createElement('button');
+    mini.id = 'cb-mini';
+    mini.textContent = '⚡';
+    mini.style.cssText = `
+      position:fixed; bottom:80px; right:16px; z-index:999999;
+      width:36px; height:36px; border-radius:50%;
+      background:linear-gradient(135deg,#D4A574,#8B6340);
+      border:none; cursor:pointer; font-size:16px;
+      box-shadow:0 2px 12px rgba(0,0,0,0.4);
+    `;
+    mini.addEventListener('click', () => {
+      document.body.removeChild(mini);
+      BADGE.style.display = 'block';
+    });
+    document.body.appendChild(mini);
+  }
+
+  // ── File picker modal ─────────────────────────────────────────
+  function showFilePicker() {
+    const existing = document.getElementById('cb-picker-modal');
+    if (existing) existing.remove();
+
+    const paths = Object.keys(FILES);
+    const modal = document.createElement('div');
+    modal.id = 'cb-picker-modal';
+    modal.style.cssText = `
+      position:fixed; inset:0; z-index:9999999;
+      background:rgba(0,0,0,0.6);
+      display:flex; align-items:center; justify-content:center;
+    `;
+    modal.innerHTML = `
+      <div style="
+        background:#0D0B08; border:1px solid rgba(212,165,116,0.2);
+        border-radius:14px; padding:20px; width:360px; max-height:400px;
+        font-family:'Segoe UI',sans-serif;
+      ">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <span style="font-size:14px;font-weight:600;color:#E8D5B7">⚡ Select files to attach</span>
+          <button id="cb-picker-close" style="background:none;border:none;color:#6B5D4F;cursor:pointer;font-size:16px">×</button>
+        </div>
+        <div style="overflow-y:auto;max-height:240px;display:flex;flex-direction:column;gap:4px" id="cb-file-list">
+          ${paths.map(p => `
+            <label style="display:flex;align-items:center;gap:8px;padding:5px 8px;
+              background:rgba(255,255,255,0.02);border-radius:6px;cursor:pointer;
+              font-size:12px;color:#8B9E7A;font-family:monospace">
+              <input type="checkbox" data-path="${p}" style="accent-color:#D4A574"> ${p}
+            </label>
+          `).join('')}
+        </div>
+        <button id="cb-attach-selected" style="
+          margin-top:12px; width:100%; padding:9px;
+          background:linear-gradient(135deg,#D4A574,#8B6340);
+          color:#0D0B08; border:none; border-radius:8px;
+          font-size:13px; font-weight:700; cursor:pointer;
+        ">Attach selected files</button>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    document.getElementById('cb-picker-close').addEventListener('click', () => modal.remove());
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+    document.getElementById('cb-attach-selected').addEventListener('click', () => {
+      const checked = [...modal.querySelectorAll('input:checked')].map(i => i.dataset.path);
+      if (checked.length === 0) { alert('Select at least one file.'); return; }
+      injectText(buildContext(checked));
+      modal.remove();
+    });
+  }
+
+  // ── Watch Claude responses for code fixes ─────────────────────
+  function watchForFixes() {
+    const observer = new MutationObserver(() => {
+      // Look for code blocks in latest AI response
+      const codeBlocks = document.querySelectorAll('pre code:not([data-cb-processed])');
+      codeBlocks.forEach(block => {
+        block.dataset.cbProcessed = '1';
+        const content = block.textContent;
+        // Look for file path in comment above code block
+        const pre = block.parentElement;
+        const prev = pre.previousElementSibling;
+        if (!prev) return;
+        const text = prev.textContent.trim();
+
+        // Detect file paths like "worker.py" or "src/main.py"
+        const pathMatch = text.match(/[\w\/\-\.]+\.(py|js|ts|jsx|tsx|json|yaml|yml|html|css|sh|md)/);
+        if (!pathMatch) return;
+
+        const path = pathMatch[0];
+
+        // Add "Apply fix" button after code block
+        const applyBtn = document.createElement('button');
+        applyBtn.textContent = `⚡ Apply fix to ${path}`;
+        applyBtn.style.cssText = `
+          display:block; margin:6px 0; padding:5px 14px;
+          background:rgba(116,192,165,0.15);
+          border:1px solid rgba(116,192,165,0.3);
+          color:#74C0A5; border-radius:6px;
+          font-size:11px; cursor:pointer; font-family:'Segoe UI',sans-serif;
+        `;
+        applyBtn.addEventListener('click', () => {
+          chrome.runtime.sendMessage({
+            type: 'CB_ADD_FIX',
+            fix: {
+              path: path,
+              content: content,
+              preview: content.slice(0, 100),
+            }
+          });
+          applyBtn.textContent = '✅ Queued — open extension to apply';
+          applyBtn.disabled = true;
+        });
+        pre.after(applyBtn);
+      });
+    });
+
+    observer.observe(document.body, {childList: true, subtree: true});
+  }
+
+  // ── Update badge label ────────────────────────────────────────
+  function updateBadge() {
+    const el = document.getElementById('cb-proj-label');
+    if (!el) return;
+    const count = Object.keys(FILES).length;
+    el.textContent = `${PROJECT} · ${count} files ready`;
+  }
+
+  // ── Init: load state from storage ────────────────────────────
+  async function init() {
+    const data = await chrome.storage.local.get(['connected','projectName','files']);
+    if (data.connected && data.projectName) {
+      PROJECT = data.projectName;
+      FILES   = data.files || {};
+      createBadge();
+      updateBadge();
+      watchForFixes();
+    }
+  }
+
+  // ── Listen for messages from popup ───────────────────────────
+  chrome.runtime.onMessage.addListener((msg) => {
+    if (msg.type === 'CB_CONNECTED') {
+      PROJECT = msg.projectName;
+      chrome.storage.local.get('files', d => {
+        FILES = d.files || {};
+        if (BADGE) { BADGE.style.display = 'block'; updateBadge(); }
+        else { createBadge(); updateBadge(); }
+        watchForFixes();
+      });
+    }
+    if (msg.type === 'CB_DISCONNECTED') {
+      PROJECT = null; FILES = {};
+      if (BADGE) BADGE.remove();
+      BADGE = null;
+      const mini = document.getElementById('cb-mini');
+      if (mini) mini.remove();
+    }
+  });
+
+  // ── Storage change listener ───────────────────────────────────
+  chrome.storage.onChanged.addListener((changes) => {
+    if (changes.files) {
+      FILES = changes.files.newValue || {};
+      updateBadge();
+    }
+  });
+
+  // ── Start ─────────────────────────────────────────────────────
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();

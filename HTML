@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CodeBridge from Bunchhh</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 320px;
+    font-family: 'Segoe UI', sans-serif;
+    background: #0D0B08;
+    color: #C8B99A;
+    padding: 0;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1A1510, #0D0B08);
+    padding: 16px;
+    border-bottom: 1px solid rgba(212,165,116,0.15);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, #D4A574, #8B6340);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .brand { flex: 1; }
+  .brand-name {
+    font-size: 14px; font-weight: 700;
+    color: #E8D5B7; letter-spacing: -0.2px;
+  }
+  .brand-sub {
+    font-size: 10px; color: #6B5D4F;
+    letter-spacing: 0.05em;
+  }
+  .bunchhh-tag {
+    font-size: 10px;
+    background: rgba(212,165,116,0.12);
+    border: 1px solid rgba(212,165,116,0.25);
+    color: #D4A574;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+
+  /* Body */
+  .body { padding: 14px; }
+
+  /* Status */
+  .status-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #3D3028; display: inline-block;
+    margin-right: 5px;
+  }
+  .status-dot.live { background: #74C0A5; animation: pulse 2s ease infinite; }
+  @keyframes pulse { 0%,100%{opacity:.5} 50%{opacity:1} }
+
+  /* Cards */
+  .card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+  .card-label {
+    font-size: 10px; color: #3D3028;
+    letter-spacing: 0.1em; margin-bottom: 8px;
+  }
+
+  /* Buttons */
+  .btn {
+    width: 100%; padding: 11px;
+    border-radius: 8px; border: none;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: opacity 0.2s;
+    display: flex; align-items: center;
+    justify-content: center; gap: 8px;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn-primary {
+    background: linear-gradient(135deg, #D4A574, #8B6340);
+    color: #0D0B08;
+  }
+  .btn-ghost {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #6B5D4F;
+  }
+  .btn-danger {
+    background: rgba(196,116,116,0.1);
+    border: 1px solid rgba(196,116,116,0.2);
+    color: #C47474;
+  }
+
+  /* Project info */
+  .project-name {
+    font-size: 15px; font-weight: 600;
+    color: #E8D5B7; margin-bottom: 3px;
+  }
+  .project-path {
+    font-size: 10px; color: #4D3D2D;
+    font-family: monospace; margin-bottom: 8px;
+  }
+  .file-count {
+    font-size: 12px; color: #74C0A5;
+  }
+
+  /* Files list */
+  .files-wrap {
+    display: flex; flex-wrap: wrap; gap: 4px;
+    max-height: 80px; overflow-y: auto;
+  }
+  .file-chip {
+    padding: 2px 8px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 4px;
+    font-size: 10px; font-family: monospace;
+    color: #6B5D4F;
+  }
+
+  /* Fix queue */
+  .fix-item {
+    padding: 8px;
+    background: rgba(116,192,165,0.06);
+    border: 1px solid rgba(116,192,165,0.15);
+    border-radius: 7px;
+    margin-bottom: 6px;
+  }
+  .fix-file {
+    font-size: 11px; font-family: monospace;
+    color: #D4A574; margin-bottom: 6px;
+  }
+  .fix-btn {
+    padding: 4px 12px; border-radius: 5px; border: none;
+    background: rgba(116,192,165,0.15);
+    color: #74C0A5; font-size: 11px; cursor: pointer;
+  }
+
+  /* How to use */
+  .step {
+    display: flex; gap: 8px;
+    align-items: flex-start;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 12px; color: #6B5D4F;
+  }
+  .step:last-child { border-bottom: none; }
+  .step-num {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: rgba(212,165,116,0.1);
+    border: 1px solid rgba(212,165,116,0.2);
+    display: flex; align-items: center;
+    justify-content: center;
+    font-size: 10px; color: #D4A574;
+    flex-shrink: 0; font-weight: 700;
+  }
+
+  /* Footer */
+  .footer {
+    padding: 10px 14px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    display: flex; align-items: center;
+    justify-content: space-between;
+  }
+  .footer a {
+    font-size: 10px; color: #D4A574;
+    text-decoration: none; letter-spacing: 0.05em;
+  }
+  .footer-tag {
+    font-size: 10px; color: #3D3028;
+  }
+
+  /* Loading */
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(0,0,0,0.2);
+    border-top-color: #0D0B08;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #error-msg {
+    font-size: 11px; color: #C47474;
+    text-align: center; margin-top: 8px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="logo">⚡</div>
+  <div class="brand">
+    <div class="brand-name">CodeBridge</div>
+    <div class="brand-sub">BY BUNCHHH</div>
+  </div>
+  <span class="bunchhh-tag">bunchhh.com</span>
+</div>
+
+<div class="body">
+
+  <!-- NOT CONNECTED STATE -->
+  <div id="state-disconnected">
+    <div class="card">
+      <div class="card-label">CONNECT YOUR PROJECT</div>
+      <div style="font-size:12px;color:#6B5D4F;margin-bottom:12px;line-height:1.6">
+        Select your project folder. Claude, ChatGPT or Gemini will read and fix your code directly. No copy-paste. No API key.
+      </div>
+      <button class="btn btn-primary" id="connect-btn">
+        <span id="connect-label">⚡ Connect Project Folder</span>
+        <div class="spinner" id="connect-spinner" style="display:none"></div>
+      </button>
+      <div id="error-msg"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">HOW IT WORKS</div>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>Click "Connect Project Folder" → select your code folder</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>Go to Claude.ai, ChatGPT, or Gemini — see ⚡ badge appear</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>Click "Attach Codebase" → ask anything about your project</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div>AI reads your files and writes fixes directly to disk</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONNECTED STATE -->
+  <div id="state-connected" style="display:none">
+
+    <!-- Project info -->
+    <div class="card" style="border-color:rgba(212,165,116,0.2)">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between">
+        <div>
+          <div class="project-name" id="proj-name">—</div>
+          <div class="project-path" id="proj-path">—</div>
+          <div class="file-count" id="proj-files">0 files connected</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;font-size:11px;color:#74C0A5">
+          <span class="status-dot live"></span> Live
+        </div>
+      </div>
+    </div>
+
+    <!-- Files -->
+    <div class="card">
+      <div class="card-label">FILES AI CAN SEE</div>
+      <div class="files-wrap" id="files-list"></div>
+    </div>
+
+    <!-- Pending fixes -->
+    <div id="fix-queue-wrap" style="display:none">
+      <div class="card" style="border-color:rgba(116,192,165,0.2)">
+        <div class="card-label">PENDING FIXES FROM AI</div>
+        <div id="fix-queue"></div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <button class="btn btn-ghost" id="refresh-btn" style="margin-bottom:8px">
+      ↺ Re-scan project files
+    </button>
+    <button class="btn btn-danger" id="disconnect-btn">
+      Disconnect project
+    </button>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <a href="https://bunchhh.com" target="_blank">bunchhh.com</a>
+  <span class="footer-tag">CodeBridge v1.0 · Free forever</span>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>

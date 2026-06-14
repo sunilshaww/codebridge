@@ -1,0 +1,24 @@
+﻿[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codebridge-mcp"
+version = "1.0.0"
+description = "CodeBridge from Bunchhh - Connect any project to any AI. No API key. No copy-paste."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+keywords = ["ai", "mcp", "claude", "chatgpt", "gemini", "codebridge", "bunchhh"]
+dependencies = []
+
+[project.scripts]
+codebridge = "codebridge.__main__:main"
+
+[project.urls]
+Homepage = "https://bunchhh.com"
+GitHub = "https://github.com/sunilshaww/codebridge"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["codebridge*"]

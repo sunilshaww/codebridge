@@ -1,0 +1,48 @@
+"""
+QR Code generator for CodeBridge terminal.
+Adds QR code to terminal output so user can scan from phone.
+"""
+
+def generate_qr_terminal(url):
+    """Generate ASCII QR code for terminal display."""
+    try:
+        import qrcode
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=1,
+            border=1,
+        )
+        qr.add_data(url)
+        qr.make(fit=True)
+
+        # Print as ASCII blocks
+        matrix = qr.get_matrix()
+        print("\n  Scan to open on mobile:\n")
+        for row in matrix:
+            line = "  "
+            for cell in row:
+                line += "██" if cell else "  "
+            print(line)
+        print()
+    except ImportError:
+        # qrcode not installed — skip silently
+        pass
+
+
+def generate_qr_svg(url, output_path="qr.svg"):
+    """Generate SVG QR code for dashboard."""
+    try:
+        import qrcode
+        import qrcode.image.svg
+        factory = qrcode.image.svg.SvgImage
+        img = qrcode.make(url, image_factory=factory)
+        img.save(output_path)
+        return output_path
+    except ImportError:
+        return None
+
+
+# ── Standalone test ─────────────────────────────────────────────
+if __name__ == "__main__":
+    generate_qr_terminal("http://192.168.1.5:7777")

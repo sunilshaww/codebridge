@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CodeBridge</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  width: 300px;
+  background: #0C0F0A;
+  font-family: 'Segoe UI', sans-serif;
+  color: #C4CDB8;
+}
+
+.header {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; gap: 10px;
+}
+.logo {
+  width: 30px; height: 30px;
+  background: linear-gradient(135deg, #A8D490, #4A8A30);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}
+.brand-name { font-size: 14px; font-weight: 600; color: #E4EDD8; }
+.brand-sub  { font-size: 10px; color: #3D4A30; letter-spacing: .06em; }
+.bunchhh {
+  margin-left: auto;
+  font-size: 10px; color: #A8D490;
+  border: 1px solid rgba(168,212,144,0.2);
+  padding: 2px 8px; border-radius: 20px;
+}
+
+.body { padding: 14px 16px; }
+
+/* States */
+#state-disconnected, #state-connected { display: none; }
+#state-disconnected.show, #state-connected.show { display: block; }
+
+.section-label {
+  font-size: 10px; color: #3D4A30;
+  letter-spacing: .1em; margin-bottom: 8px;
+}
+
+input {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 9px 12px;
+  color: #E4EDD8;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+input:focus { outline: none; border-color: rgba(168,212,144,0.4); }
+input::placeholder { color: #3D4A30; letter-spacing: 0; font-family: 'Segoe UI', sans-serif; }
+
+.btn {
+  width: 100%; padding: 10px;
+  border-radius: 8px; border: none;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: opacity .2s;
+  font-family: 'Segoe UI', sans-serif;
+}
+.btn:hover { opacity: .85; }
+.btn-primary { background: linear-gradient(135deg, #A8D490, #4A8A30); color: #0C0F0A; }
+.btn-ghost {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #6B7A60; margin-top: 8px;
+}
+.btn-danger {
+  background: rgba(196,116,116,0.1);
+  border: 1px solid rgba(196,116,116,0.2);
+  color: #C47474; margin-top: 6px;
+}
+
+.error { font-size: 11px; color: #C47474; text-align: center; margin-top: 6px; display: none; }
+
+/* Connected state */
+.ws-badge {
+  background: rgba(168,212,144,0.06);
+  border: 1px solid rgba(168,212,144,0.15);
+  border-radius: 10px; padding: 12px;
+  margin-bottom: 12px;
+}
+.ws-id {
+  font-size: 18px; font-weight: 600;
+  font-family: 'Courier New', monospace;
+  color: #A8D490; letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+.ws-project { font-size: 12px; color: #6B7A60; }
+.ws-files   { font-size: 12px; color: #A8D490; margin-top: 4px; }
+
+.live-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #A8D490; display: inline-block;
+  animation: pulse 2s ease infinite; margin-right: 4px;
+}
+@keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+.steps { margin-bottom: 12px; }
+.step {
+  display: flex; gap: 8px; align-items: flex-start;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 12px; color: #6B7A60;
+}
+.step:last-child { border: none; }
+.step-num {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: rgba(168,212,144,0.1);
+  border: 1px solid rgba(168,212,144,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: #A8D490; flex-shrink: 0; font-weight: 700;
+}
+
+.attach-btn {
+  width: 100%; padding: 10px;
+  background: linear-gradient(135deg, #A8D490, #4A8A30);
+  border: none; border-radius: 8px;
+  color: #0C0F0A; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: 'Segoe UI', sans-serif;
+  margin-bottom: 6px;
+}
+
+.footer {
+  padding: 10px 16px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.footer a { font-size: 10px; color: #A8D490; text-decoration: none; }
+.footer-tag { font-size: 10px; color: #2D3A20; }
+
+.spinner {
+  width: 14px; height: 14px;
+  border: 2px solid rgba(0,0,0,.2);
+  border-top-color: #0C0F0A;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  display: inline-block; vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="logo">⚡</div>
+  <div>
+    <div class="brand-name">CodeBridge</div>
+    <div class="brand-sub">BY BUNCHHH</div>
+  </div>
+  <span class="bunchhh">bunchhh.com</span>
+</div>
+
+<div class="body">
+
+  <!-- DISCONNECTED -->
+  <div id="state-disconnected" class="show">
+    <div class="section-label">ENTER YOUR WORKSPACE ID</div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>Run <code style="font-size:11px;background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:3px;color:#A8D490">codebridge start</code> in your terminal</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>Copy your Workspace ID from terminal</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>Paste below and click Connect</div>
+      </div>
+    </div>
+
+    <input type="text" id="ws-input" placeholder="WS-XXXX-XXXX" maxlength="12" />
+    <button class="btn btn-primary" id="connect-btn">
+      <span id="connect-label">⚡ Connect Workspace</span>
+    </button>
+    <div class="error" id="error-msg"></div>
+  </div>
+
+  <!-- CONNECTED -->
+  <div id="state-connected">
+    <div class="ws-badge">
+      <div style="display:flex;align-items:center;gap:5px;margin-bottom:8px">
+        <span class="live-dot"></span>
+        <span style="font-size:11px;color:#A8D490">Connected</span>
+      </div>
+      <div class="ws-id" id="ws-id-display">—</div>
+      <div class="ws-project" id="ws-project-display">—</div>
+      <div class="ws-files"  id="ws-files-display">—</div>
+    </div>
+
+    <div style="font-size:10px;color:#3D4A30;letter-spacing:.1em;margin-bottom:8px">ON THIS PAGE</div>
+    <button class="attach-btn" id="attach-btn">📎 Attach workspace to AI</button>
+    <button class="btn btn-ghost" id="pick-btn">Pick specific files</button>
+    <button class="btn btn-danger" id="disconnect-btn">Disconnect</button>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <a href="https://bunchhh.com" target="_blank">bunchhh.com</a>
+  <span class="footer-tag">CodeBridge · Free</span>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>

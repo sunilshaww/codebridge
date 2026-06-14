@@ -3,7 +3,7 @@ CodeBridge — Connect your project to any AI.
 One command. One code. Any model.
 """
 
-import os, json, subprocess, socket, threading
+import os, json, subprocess, socket, threading, uuid
 import webbrowser, random, string
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse
@@ -12,6 +12,7 @@ from urllib.parse import urlparse
 PROJECT = os.getcwd()
 CODE    = "CB-" + ''.join(random.choices("ABCDEFGHJKLMNPQRSTUVWXYZ23456789", k=4)) + \
           "-" + ''.join(random.choices("ABCDEFGHJKLMNPQRSTUVWXYZ23456789", k=4))
+WORKSPACE_ID = str(uuid.uuid4())[:8].upper()
 PORT    = 7777
 LOG     = []   # change history
 
@@ -172,19 +173,35 @@ class H(BaseHTTPRequestHandler):
                 "name": "CodeBridge",
                 "version": "1.0.0",
                 "connection_code": CODE,
+                "workspace_id": WORKSPACE_ID,
                 "description": "Your project is connected. I can read files, write fixes, run commands.",
                 "tools": TOOLS
+            })
+
+        elif p == "/workspace":
+            self.json({
+                "workspace_id": WORKSPACE_ID,
+                "project": os.path.basename(PROJECT),
+                "path": PROJECT,
+                "files": len(get_files())
             })
 
         elif p == "/status":
             self.json({
                 "connected": True,
                 "code": CODE,
+                "workspace_id": WORKSPACE_ID,
                 "project": os.path.basename(PROJECT),
                 "path": PROJECT,
                 "files": len(get_files()),
                 "log": LOG[-10:]
             })
+
+        elif p == "/mobile":
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html")
+            self.end_headers()
+            self.wfile.write(mobile_scanner().encode())
 
         else:
             self.json({"error": "not found"}, 404)
@@ -280,6 +297,11 @@ h1{{font-size:22px;font-weight:600;color:#E4EDD8;margin-bottom:4px}}
     <div class="big-code">{CODE}</div>
     <div style="font-size:11px;color:#6B7A60;margin-top:8px">Paste this into Claude / ChatGPT / Gemini</div>
   </div>
+  <div style="margin-top:12px;padding:12px;background:rgba(0,0,0,0.2);border-radius:8px">
+    <div style="font-size:10px;color:#3D4A30;margin-bottom:4px">WORKSPACE ID (for Extension)</div>
+    <div style="font-size:18px;font-weight:600;color:#A8D490;font-family:'DM Mono',monospace">{WORKSPACE_ID}</div>
+    <div style="font-size:11px;color:#6B7A60;margin-top:4px">Use this in VS Code extension to connect</div>
+  </div>
 </div>
 
 <!-- How to connect -->
@@ -374,6 +396,52 @@ setInterval(refreshLog, 4000);
 </script>
 </body></html>"""
 
+# ── Mobile Scanner HTML ─────────────────────────────────────
+def mobile_scanner():
+    ip = socket.gethostbyname(socket.gethostname())
+    return f"""<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mobile Scanner - CodeBridge</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+*{{box-sizing:border-box;margin:0;padding:0}}
+body{{background:#0D0F0B;color:#C4CDB8;font-family:'DM Sans',sans-serif;
+     min-height:100vh;padding:20px;max-width:500px;margin:0 auto}}
+h1{{font-size:20px;font-weight:600;color:#E4EDD8;margin-bottom:16px}}
+.scan-area{{background:rgba(255,255,255,0.03);border:2px dashed rgba(168,212,144,0.3);
+           border-radius:12px;padding:30px;text-align:center;margin-bottom:20px}}
+.workspace-id{{font-size:32px;font-weight:600;letter-spacing:8px;color:#A8D490;
+                 font-family:'DM Mono',monospace;margin:20px 0}}
+.btn{{display:block;width:100%;padding:14px;background:rgba(168,212,144,0.15);
+      border:1px solid rgba(168,212,144,0.4);border-radius:8px;color:#A8D490;
+      font-size:14px;font-weight:500;margin:10px 0;text-decoration:none}}
+.qr-code{{width:180px;height:180px;background:rgba(255,255,255,0.05);
+          margin:20px auto;border-radius:12px;display:flex;align-items:center;
+          justify-content:center;font-size:40px}}
+</style>
+</head><body>
+
+<h1>📱 Mobile Scanner</h1>
+
+<div class="qr-code">🔲</div>
+
+<div class="scan-area">
+  <div style="font-size:12px;color:#3D4A30;margin-bottom:8px">WORKSPACE ID</div>
+  <div class="workspace-id">{WORKSPACE_ID}</div>
+  <div style="font-size:11px;color:#6B7A60;margin-top:8px">Connect from your phone</div>
+</div>
+
+<a href="http://{ip}:{PORT}" class="btn">Open Dashboard</a>
+<a href="http://{ip}:{PORT}/workspace" class="btn">Connect with AI</a>
+
+<div style="margin-top:20px;font-size:11px;color:#6B7A60;text-align:center">
+  Visit http://{ip}:{PORT}/mobile on your phone<br>or scan QR code when available
+</div>
+
+</body></html>"""
+
 
 # ── Start ───────────────────────────────────────────────────
 def start():
@@ -385,17 +453,22 @@ def start():
 ║     ⚡  CodeBridge by Bunchhh  ⚡            ║
 ║   democratizing-ai-powered-development       ║
 ╠══════════════════════════════════════════════╣
-║  Project  : {os.path.basename(PROJECT):<30} ║
-║  Code     : {CODE:<30} ║
+║  Project    : {os.path.basename(PROJECT):<28} ║
+║  Workspace  : {WORKSPACE_ID:<28} ║
+║  Code       : {CODE:<30} ║
 ╠══════════════════════════════════════════════╣
 ║  Dashboard : http://localhost:{PORT}           ║
 ║  Mobile    : http://{ip}:{PORT}               ║
 ║  MCP URL   : http://{ip}:{PORT}/mcp           ║
+║  Workspace : http://{ip}:{PORT}/workspace     ║
 ╠══════════════════════════════════════════════╣
 ║  1. Copy the MCP URL above                   ║
 ║  2. Paste into Claude / ChatGPT / Gemini     ║
 ║  3. See ⚡ logo → start talking               ║
 ╠══════════════════════════════════════════════╣
+║  For Extension: use workspace ID {WORKSPACE_ID}    ║
+║  For Mobile: visit http://{ip}:{PORT} on phone ║
+║                                            ║
 ║  Learn more: https://bunchhh.com             ║
 ╚══════════════════════════════════════════════╝
 Press Ctrl+C to stop.
